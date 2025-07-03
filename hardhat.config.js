@@ -8,7 +8,7 @@ module.exports = {
   solidity: {
     compilers: [
       {
-        version: "0.8.28",
+        version: "0.8.20",
         settings: {
           optimizer: {
             enabled: true,
@@ -24,8 +24,8 @@ module.exports = {
     },
     bsc: {
       url: API_URL,
-      chainId: 56,
-      accounts: [`0x${PRIVATE_KEY}`],
+      chainId: 97,
+      accounts: [`${PRIVATE_KEY}`],
     },
   },
   etherscan: {

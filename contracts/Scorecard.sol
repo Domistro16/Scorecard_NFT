@@ -1,25 +1,38 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.28;
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 interface IPriceOracle {
-    function getLatestPrice() external view returns (uint256);
+    function latestRoundData()
+        external
+        view
+        returns (
+            uint80 roundId,
+            int256 answer,
+            uint256 startedAt,
+            uint256 updatedAt,
+            uint80 answeredInRound
+        );
 }
 
 contract ScorecardNFT is ERC721URIStorage, Ownable {
     uint256 private _tokenIds;
-    uint256 public constant MINT_FEE_USD = 5 * 1e18; // $5 in 18 decimal precision
+    uint256 public constant MINT_FEE_USD = 5 * 1e8; // $5 in 18 decimal precision
     IPriceOracle public priceOracle;
 
-    event NFTMinted(address indexed recipient, uint256 tokenId, string tokenURI);
+    event NFTMinted(
+        address indexed recipient,
+        uint256 tokenId,
+        string tokenURI
+    );
     event FundsWithdrawn(address indexed owner, uint256 amount);
 
-    constructor(address initialOwner, address oracleAddress)
-        ERC721("ScorecardNFT", "SCNFT")
-        Ownable(initialOwner)
-    {
+    constructor(
+        address initialOwner,
+        address oracleAddress
+    ) ERC721("Safucard", "SCNFT") Ownable(initialOwner) {
         _tokenIds = 1;
         priceOracle = IPriceOracle(oracleAddress);
     }
@@ -41,13 +54,13 @@ contract ScorecardNFT is ERC721URIStorage, Ownable {
     }
 
     function getMintFeeInNative() public view returns (uint256) {
-    uint256 ethPrice = priceOracle.getLatestPrice(); // Price should have 18 decimals
-    require(ethPrice > 0, "Invalid oracle price");
-    return (MINT_FEE_USD * 10**18) / ethPrice; // Proper division for ETH amount
+        (, int256 answer, , , , ) = priceOracle.latestRoundData(); // Price should have 18 decimals
+        require(answer > 0, "Invalid oracle price");
+        return (MINT_FEE_USD / uint256(answer)) * 1e18; // Proper division for ETH amount
     }
 
     function _setTokenURI(
-        uint256 tokenId, 
+        uint256 tokenId,
         string memory tokenURI_
     ) internal override {
         require(
@@ -56,6 +69,7 @@ contract ScorecardNFT is ERC721URIStorage, Ownable {
         );
         super._setTokenURI(tokenId, tokenURI_);
     }
+
     function withdrawFunds() external onlyOwner {
         uint256 balance = address(this).balance;
         require(balance > 0, "No funds to withdraw");
@@ -68,4 +82,3 @@ contract ScorecardNFT is ERC721URIStorage, Ownable {
 
     receive() external payable {} // Allow contract to receive payments
 }
-
