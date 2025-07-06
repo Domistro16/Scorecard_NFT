@@ -19,7 +19,6 @@ interface IPriceOracle {
 
 contract ScorecardNFT is ERC721URIStorage, Ownable {
     uint256 private _tokenIds;
-    uint256 public constant MINT_FEE_USD = 5 * 1e8; // $5 in 18 decimal precision
     IPriceOracle public priceOracle;
 
     event NFTMinted(
@@ -54,9 +53,13 @@ contract ScorecardNFT is ERC721URIStorage, Ownable {
     }
 
     function getMintFeeInNative() public view returns (uint256) {
-        (, int256 answer, , , , ) = priceOracle.latestRoundData(); // Price should have 18 decimals
+        (, int256 answer, , , ) = priceOracle.latestRoundData(); // answer has 8 decimals
         require(answer > 0, "Invalid oracle price");
-        return (MINT_FEE_USD / uint256(answer)) * 1e18; // Proper division for ETH amount
+
+        uint256 price = uint256(answer); // 8 decimals
+        uint256 usdAmount = 5 * 1e18; // 5 USD in 18 decimals
+
+        return (usdAmount * 1e8) / price;
     }
 
     function _setTokenURI(

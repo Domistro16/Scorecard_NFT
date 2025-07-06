@@ -15,7 +15,8 @@
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",
     "@nomicfoundation/hardhat-verify": "^2.0.13",
     "chai": "^5.2.0",
-    "hardhat": "^2.22.19"
+    "hardhat": "^2.22.19",
+    "typescript": "^5.8.3"
   },
   "dependencies": {
     "@nomicfoundation/hardhat-ethers": "^3.0.0",
