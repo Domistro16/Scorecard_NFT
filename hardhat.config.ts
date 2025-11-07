@@ -1,8 +1,8 @@
 import"dotenv/config";
 import { HardhatUserConfig } from "hardhat/types";
-import ("@nomicfoundation/hardhat-verify");
-import ("@nomicfoundation/hardhat-chai-matchers");
-import ("@nomicfoundation/hardhat-ethers"); 
+import "@nomicfoundation/hardhat-verify";
+import "@nomicfoundation/hardhat-chai-matchers";
+import "@nomicfoundation/hardhat-ethers"; 
 const { API_URL, DEPLOYER_KEY } = process.env;
 
 const config = {
@@ -24,14 +24,14 @@ const config = {
     hardhat: {},
     bsc: {
       url: API_URL,
-      chainId: 97,
+      chainId: 56,
       accounts: [`${DEPLOYER_KEY}`],
     },
   },
   etherscan: {
     // Your API key for Etherscan
     // Obtain one at https://etherscan.io/
-    apiKey: "4MJADPB2SXCSKNET9W5TGV6VSMMBNNZ38J",
+    apiKey: process.env.API_KEY,
   },
   sourcify: {
     // Disabled by default

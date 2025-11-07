@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 interface IPriceOracle {
@@ -17,7 +19,7 @@ interface IPriceOracle {
         );
 }
 
-contract ScorecardNFT is ERC721URIStorage, Ownable {
+contract ScorecardNFT is ERC721, ERC721URIStorage, Ownable {
     uint256 private _tokenIds;
     IPriceOracle public priceOracle;
 
@@ -29,14 +31,13 @@ contract ScorecardNFT is ERC721URIStorage, Ownable {
     event FundsWithdrawn(address indexed owner, uint256 amount);
 
     constructor(
-        address initialOwner,
         address oracleAddress
-    ) ERC721("Safucard", "SCNFT") Ownable(initialOwner) {
-        _tokenIds = 1;
+    ) ERC721("Safucard", "SCNFT") Ownable(msg.sender) {
+        _tokenIds = 0;
         priceOracle = IPriceOracle(oracleAddress);
     }
 
-    function mintNFT(string memory tokenURI) public payable returns (uint256) {
+    function mintNFT(string memory _URI) public payable returns (uint256) {
         uint256 requiredFee = getMintFeeInNative();
         require(msg.value >= requiredFee, "Insufficient mint fee");
 
@@ -44,10 +45,10 @@ contract ScorecardNFT is ERC721URIStorage, Ownable {
         _tokenIds++;
         uint256 newItemId = _tokenIds;
 
-        _mint(msg.sender, newItemId);
-        _setTokenURI(newItemId, tokenURI);
+        _safeMint(msg.sender, newItemId);
+        _setTokenURI(newItemId, _URI);
 
-        emit NFTMinted(msg.sender, newItemId, tokenURI);
+        emit NFTMinted(msg.sender, newItemId, _URI);
 
         return newItemId;
     }
@@ -81,6 +82,20 @@ contract ScorecardNFT is ERC721URIStorage, Ownable {
         require(success, "Transfer failed");
 
         emit FundsWithdrawn(owner(), balance);
+    }
+
+    function supportsInterface(
+        bytes4 interfaceId
+    ) public view override(ERC721, ERC721URIStorage) returns (bool) {
+        return super.supportsInterface(interfaceId);
+    }
+     function tokenURI(uint256 tokenId)
+        public
+        view
+        override(ERC721, ERC721URIStorage)
+        returns (string memory)
+    {
+        return super.tokenURI(tokenId);
     }
 
     receive() external payable {} // Allow contract to receive payments
